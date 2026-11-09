@@ -1,11 +1,20 @@
 # Gimme
 
 ```elixir
-Enum.each(["key", :key], fn key ->
-  Enum.each([%{key: true}, %{"key" => true}], fn map ->
-    assert Gimme.dat(map, key)
-  end)
-end)
+Gimme.dat(%{"key" => 1}, :key)
+#=> {:ok, 1}
+
+Gimme.dat(%{key: false}, "key")
+#=> {:ok, false}
+
+Gimme.dat(%{}, :key)
+#=> {:error, :not_found}
+
+Gimme.dat!(%{"key" => 1}, :key)
+#=> 1
+
+Gimme.dat!(%{}, :key)
+#=> ** (KeyError)
 ```
 
 ## Installation
@@ -16,7 +25,7 @@ by adding `gimme` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:gimme, "~> 0.1.0"}
+    {:gimme, "~> 1.0"}
   ]
 end
 ```
