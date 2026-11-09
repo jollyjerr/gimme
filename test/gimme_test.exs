@@ -17,15 +17,12 @@ defmodule GimmeTest do
     end
   end
 
-  test "nil, true, and false keys don't count" do
-    for name <- ["nil", "true", "false"] do
-      map = %{String.to_atom(name) => 1}
-      assert Gimme.dat(map, name) == {:error, :not_found}
-      assert_raise KeyError, fn -> Gimme.dat!(map, name) end
-    end
-
-    for key <- [nil, true, false] do
-      assert_raise FunctionClauseError, fn -> Gimme.dat(%{key => 1}, key) end
+  test "should find nil, true, and false as keys" do
+    for atom <- [nil, true, false], name = Atom.to_string(atom) do
+      for map <- [%{atom => 1}, %{name => 1}], key <- [atom, name] do
+        assert Gimme.dat(map, key) == {:ok, 1}
+        assert Gimme.dat!(map, key) == 1
+      end
     end
   end
 
@@ -70,6 +67,6 @@ defmodule GimmeTest do
   end
 
   defp key_name do
-    filter(string(:alphanumeric, min_length: 1), &(&1 not in ["nil", "true", "false"]))
+    string(:alphanumeric, min_length: 1)
   end
 end

@@ -3,13 +3,10 @@ defmodule Gimme do
   Need to ship a feature but yo data is wack? Use `Gimme.dat(map, :key)`!
   """
 
-  @not_keys [nil, true, false]
-  @not_key_strings Enum.map(@not_keys, &Atom.to_string/1)
-
-  defguardp is_key(key) when is_binary(key) or (is_atom(key) and key not in @not_keys)
+  defguardp is_key(key) when is_binary(key) or is_atom(key)
 
   @doc """
-  Get any `:key` or `"key"` from a map :)
+  Gimme any `:key` or `"key"` from a map. :)
 
       iex> Gimme.dat(%{"key" => 1}, :key)
       {:ok, 1}
@@ -17,21 +14,18 @@ defmodule Gimme do
       iex> Gimme.dat(%{key: false}, "key")
       {:ok, false}
 
+  Nothing there? No worries, no crashing:
+
       iex> Gimme.dat(%{}, :key)
       {:error, :not_found}
 
       iex> Gimme.dat(%{}, "gimme_no_such_atom")
       {:error, :not_found}
 
-  Stored both ways? The exact match wins:
+  Got 'em both? Exact match wins!
 
       iex> Gimme.dat(%{:key => 1, "key" => 2}, "key")
       {:ok, 2}
-
-  `nil`, `true`, and `false` don't count as keys. Not even as strings:
-
-      iex> Gimme.dat(%{nil: 1}, "nil")
-      {:error, :not_found}
   """
   @spec dat(map(), String.t() | atom()) :: {:ok, any()} | {:error, :not_found}
   def dat(thing, key) when is_map(thing) and is_key(key) do
@@ -42,7 +36,7 @@ defmodule Gimme do
   end
 
   @doc """
-  Like `dat/2` but just gimme the value. Raises `KeyError` if it's not there.
+  Like `dat/2`, but no tuples. Missing? `KeyError`.
 
       iex> Gimme.dat!(%{"key" => 1}, :key)
       1
@@ -60,8 +54,6 @@ defmodule Gimme do
   defp fetch_other(thing, key) when is_binary(key) do
     with {:ok, atom} <- existing_atom(key), do: Map.fetch(thing, atom)
   end
-
-  defp existing_atom(string) when string in @not_key_strings, do: :error
 
   defp existing_atom(string) do
     {:ok, String.to_existing_atom(string)}
